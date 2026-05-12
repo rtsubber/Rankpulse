@@ -33,19 +33,31 @@ export default function Home() {
     setResult(null);
 
     try {
-      const res = await fetch("https://sublime-illumination-production-5373.up.railway.app/api/audit", {
+      // Use the Vercel proxy route first, fall back to direct API
+      const apiBase = window.location.origin;
+      const res = await fetch(`${apiBase}/api/audit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: url.trim() }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || "Audit failed");
+        // If proxy fails, try direct Railway API
+        const fallbackRes = await fetch("https://sublime-illumination-production-5373.up.railway.app/api/audit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: url.trim() }),
+        });
+        if (!fallbackRes.ok) {
+          const data = await fallbackRes.json();
+          throw new Error(data.detail || "Audit failed");
+        }
+        const data: AuditResult = await fallbackRes.json();
+        setResult(data);
+      } else {
+        const data: AuditResult = await res.json();
+        setResult(data);
       }
-
-      const data: AuditResult = await res.json();
-      setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
