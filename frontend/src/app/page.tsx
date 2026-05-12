@@ -89,8 +89,7 @@ export default function Home() {
       }
       setWaitlistSubmitted(true);
     } catch (err) {
-      // Even if API fails, still show success (we'll log it)
-      setWaitlistSubmitted(true);
+      setWaitlistError(err instanceof Error ? err.message : "Failed to join waitlist. Please try again.");
     }
   };
 
@@ -577,6 +576,12 @@ export default function Home() {
             </button>
           </form>
           {waitlistError && <p className="text-red-400 text-sm mt-3">{waitlistError}</p>}
+          {waitlistSubmitted && (
+            <div className="mt-6 p-4 rounded-xl bg-green-500/10 border border-green-500/30">
+              <p className="text-green-400 font-medium">🎉 You&apos;re on the list!</p>
+              <p className="text-green-400/70 text-sm mt-1">We&apos;ll email you when Pro &amp; Agency plans launch. Early members get 50% off.</p>
+            </div>
+          )}
         </div>
       </section>
 
