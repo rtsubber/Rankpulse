@@ -4,7 +4,7 @@ import httpx
 import asyncio
 
 HEADERS = {
-    "User-Agent": "RankPulse/0.1 (+https://rankpulse.co) SEO Audit Bot",
+    "User-Agent": "BoostRank/0.1 (+https://boostrank.co) SEO Audit Bot",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
 }

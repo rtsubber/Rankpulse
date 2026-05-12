@@ -1,8 +1,8 @@
-# RankPulse — Landing Page Copy
+# BoostRank — Landing Page Copy
 
 ## Hero Section
 
-**RankPulse**
+**BoostRank**
 *Your store's SEO heartbeat.*
 
 Instant SEO audits for any e-commerce store. Catch what Google sees before your customers see what's broken.
@@ -71,7 +71,7 @@ Stack your SEO against up to 3 competitors. Find the gaps they're exploiting.
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  RankPulse Dashboard                  [Settings] │
+│  BoostRank Dashboard                  [Settings] │
 │                                                  │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
 │  │  SEO Score │  │  Speed   │  │ Issues   │       │
@@ -110,7 +110,7 @@ Our Chrome extension gives you instant SEO insights while you browse.
 - **One click** → full page audit
 - Works on **any website** — yours or competitors'
 - **Color-coded overlay** highlights issues right on the page
-- Syncs with your RankPulse dashboard
+- Syncs with your BoostRank dashboard
 
 [Install Chrome Extension — Free]
 
@@ -157,10 +157,10 @@ $49/mo
 ## FAQ
 
 **How is this different from Lighthouse?**
-Lighthouse only checks speed and basic tags. RankPulse adds e-commerce-specific checks: product schema, OG tags for social sharing, competitor benchmarking, and weekly tracking over time.
+Lighthouse only checks speed and basic tags. BoostRank adds e-commerce-specific checks: product schema, OG tags for social sharing, competitor benchmarking, and weekly tracking over time.
 
 **Does it work with Shopify / WooCommerce / BigCommerce?**
-Yes! RankPulse works with ANY website. No platform integration needed for the core audit.
+Yes! BoostRank works with ANY website. No platform integration needed for the core audit.
 
 **Is the Chrome extension really free?**
 Yes — the extension gives instant page-level audits free forever. Dashboard features like competitor tracking and weekly reports unlock with Pro.
@@ -175,7 +175,7 @@ Absolutely. No contracts, no cancellation fees. Your data stays for 30 days afte
 
 ## Footer
 
-RankPulse — SEO analytics for e-commerce, made simple.
+BoostRank — SEO analytics for e-commerce, made simple.
 
 - Product: Features | Pricing | Chrome Extension | API Docs
 - Company: About | Blog | Careers | Contact
@@ -188,9 +188,9 @@ Built with ❤️ by BrandBoost Studio
 ## Meta Tags for Landing Page
 
 ```html
-<title>RankPulse — Instant SEO Audits for E-Commerce Stores</title>
+<title>BoostRank — Instant SEO Audits for E-Commerce Stores</title>
 <meta name="description" content="Catch broken meta tags, slow pages, and missing schema before Google does. Free SEO audits in 30 seconds. Works with Shopify, WooCommerce, and any store.">
-<meta property="og:title" content="RankPulse — Instant SEO Audits for E-Commerce Stores">
+<meta property="og:title" content="BoostRank — Instant SEO Audits for E-Commerce Stores">
 <meta property="og:description" content="Free SEO score for your store. Catch broken tags, slow pages, and missing schema in 30 seconds.">
 <meta property="og:image" content="/og-image.png">
 <meta name="twitter:card" content="summary_large_image">

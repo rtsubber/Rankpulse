@@ -1,6 +1,8 @@
-# RankPulse 🚀
+# BoostRank 🚀
 
-Instant SEO audits for e-commerce stores. Catch broken meta tags, slow pages, and missing schema before Google does.
+Instant SEO audits for e-commerce stores. A [BrandBoost Studio](https://brandbooststudio.co) product.
+
+Catch broken meta tags, slow pages, and missing schema before Google does.
 
 ## Quick Start
 
@@ -30,6 +32,7 @@ curl -X POST http://localhost:8001/api/audit \
 - **Backend:** FastAPI (Python) with 6 SEO analyzers
 - **Frontend:** Next.js 14 + Tailwind CSS
 - **Scoring:** Weighted 0-100 (meta 30%, images 20%, technical 20%, schema 15%, headings 15%)
+- **Product of:** BrandBoost Studio
 
 ## API Endpoints
 
@@ -45,14 +48,21 @@ curl -X POST http://localhost:8001/api/audit \
 ### Railway (Backend)
 1. Connect GitHub repo
 2. Set root directory to `backend`
-3. Add env vars if needed
-4. Deploy
+3. Deploy
 
 ### Vercel (Frontend)
 1. Connect GitHub repo
 2. Set root directory to `frontend`
 3. Add env var: `NEXT_PUBLIC_API_URL` = your Railway backend URL
 4. Deploy
+
+## Pricing
+
+| Tier | Price | Features |
+|------|-------|----------|
+| Free | $0/mo | 1 audit/day, basic score, Chrome extension |
+| Pro | $19/mo | Unlimited audits, competitor compare, weekly reports |
+| Agency | $49/mo | 10 sites, white-label, team seats, API |
 
 ## License
 MIT

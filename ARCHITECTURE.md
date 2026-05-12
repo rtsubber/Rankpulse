@@ -5,7 +5,7 @@ A multi-platform SEO analysis tool: SaaS web app + Chrome extension + future Sho
 Targets e-commerce store owners who need affordable, actionable SEO insights.
 
 ## Brand Name Ideas
-- **RankPulse** — SEO heartbeat for your store
+- **BoostRank** — SEO heartbeat for your store
 - **SEOSnap** — instant SEO snapshots
 - **StoreScope** — see your store through Google's eyes
 - **PagePulse** — your store's SEO vitals
@@ -78,7 +78,7 @@ Targets e-commerce store owners who need affordable, actionable SEO insights.
 - **Hosting:** Vercel (frontend) + Railway or Fly.io (backend)
 - **CI/CD:** GitHub Actions
 - **Monitoring:** Sentry (errors) + PostHog (analytics)
-- **Domain:** rankpulse.co or storescope.io
+- **Domain:** boostrank.co or storescope.io
 
 ## Core Features
 

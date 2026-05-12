@@ -1,6 +1,7 @@
 """
-RankPulse — SEO Analysis API
+BoostRank — SEO Analysis API
 FastAPI backend for e-commerce SEO auditing.
+A BrandBoost Studio product.
 """
 
 from fastapi import FastAPI, HTTPException, Query
@@ -17,14 +18,14 @@ from app.analyzers.schema_org import analyze_schema
 from app.analyzers.scoring import calculate_seo_score
 
 app = FastAPI(
-    title="RankPulse API",
-    description="Instant SEO audits for e-commerce stores",
+    title="BoostRank API",
+    description="Instant SEO audits for e-commerce stores — a BrandBoost Studio product",
     version="0.1.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Tighten in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,29 +36,29 @@ app.add_middleware(
 
 class AuditRequest(BaseModel):
     url: HttpUrl
-    include_lighthouse: bool = False  # Optional slow Lighthouse run
+    include_lighthouse: bool = False
 
 class AuditIssue(BaseModel):
-    severity: str  # "critical", "warning", "info"
-    category: str  # "meta", "headings", "images", "technical", "schema"
+    severity: str
+    category: str
     message: str
     detail: Optional[str] = None
-    fix: Optional[str] = None  # How to fix it
+    fix: Optional[str] = None
 
 class AuditResponse(BaseModel):
     url: str
     timestamp: float
-    seo_score: int  # 0-100
-    scores: dict  # Breakdown by category
+    seo_score: int
+    scores: dict
     issues: list[AuditIssue]
-    page_data: dict  # Extracted metadata
+    page_data: dict
 
 
 # --- Endpoints ---
 
 @app.get("/")
 async def root():
-    return {"name": "RankPulse", "version": "0.1.0", "status": "running"}
+    return {"name": "BoostRank", "version": "0.1.0", "by": "BrandBoost Studio", "status": "running"}
 
 
 @app.get("/health")
@@ -71,20 +72,17 @@ async def audit_page(request: AuditRequest):
     url = str(request.url)
 
     try:
-        # Fetch page content
         from app.analyzers.fetcher import fetch_page
         html, response_time, final_url = await fetch_page(url)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch page: {str(e)}")
 
-    # Run all analyzers
     meta_results = analyze_meta_tags(html, url)
     heading_results = analyze_headings(html, url)
     image_results = analyze_images(html, url)
     technical_results = analyze_technical(html, url, final_url)
     schema_results = analyze_schema(html, url)
 
-    # Combine issues
     all_issues = (
         meta_results["issues"] +
         heading_results["issues"] +
@@ -93,13 +91,11 @@ async def audit_page(request: AuditRequest):
         schema_results["issues"]
     )
 
-    # Calculate scores
     scores = calculate_seo_score(
         meta_results, heading_results, image_results,
         technical_results, schema_results
     )
 
-    # Page data summary
     page_data = {
         "title": meta_results.get("title", ""),
         "description": meta_results.get("description", ""),

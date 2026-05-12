@@ -85,7 +85,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-2xl pulse-logo">⚡</span>
-            <span className="text-xl font-bold">Rank<span className="gradient-text">Pulse</span></span>
+            <span className="text-xl font-bold">Boost<span className="gradient-text">Rank</span></span>
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm text-slate-400">
             <a href="#features" className="hover:text-white transition">Features</a>
@@ -100,11 +100,11 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-4 fade-up">
             Your store&apos;s SEO{" "}
-            <span className="gradient-text">heartbeat</span>
+            <span className="gradient-text">boost</span>
           </h1>
           <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto fade-up fade-up-delay-1">
             Instant SEO audits for any e-commerce store. Catch what Google sees
-            before your customers see what&apos;s broken.
+            before your customers see what&apos;s broken. Powered by BrandBoost Studio.
           </p>
 
           {/* Audit Form */}
@@ -138,6 +138,9 @@ export default function Home() {
             </div>
             <p className="text-sm text-slate-500 mt-3">
               No signup required. Results in 30 seconds.
+            </p>
+            <p className="text-xs text-green-400 mt-1">
+              🏷️ A BrandBoost Studio product
             </p>
           </form>
 
@@ -480,11 +483,11 @@ export default function Home() {
             {[
               {
                 q: "How is this different from Lighthouse?",
-                a: "Lighthouse only checks speed and basic tags. RankPulse adds e-commerce-specific checks: product schema, OG tags for social sharing, competitor benchmarking, and weekly tracking over time.",
+                a: "Lighthouse only checks speed and basic tags. BoostRank adds e-commerce-specific checks: product schema, OG tags for social sharing, competitor benchmarking, and weekly tracking over time.",
               },
               {
                 q: "Does it work with Shopify / WooCommerce / BigCommerce?",
-                a: "Yes! RankPulse works with ANY website. No platform integration needed for the core audit.",
+                a: "Yes! BoostRank works with ANY website. No platform integration needed for the core audit.",
               },
               {
                 q: "Is the Chrome extension really free?",
@@ -509,7 +512,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <div className="flex items-center gap-2">
             <span className="text-lg">⚡</span>
-            <span className="font-semibold text-slate-300">RankPulse</span>
+            <span className="font-semibold text-slate-300">BoostRank</span>
             <span>— SEO analytics for e-commerce, made simple.</span>
           </div>
           <div>Built with ❤️ by BrandBoost Studio</div>

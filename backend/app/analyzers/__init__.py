@@ -1,1 +1,1 @@
-# RankPulse analyzers package
+# BoostRank analyzers package
