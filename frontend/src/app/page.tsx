@@ -33,7 +33,7 @@ export default function Home() {
     setResult(null);
 
     try {
-      const res = await fetch("/api/audit", {
+      const res = await fetch("https://sublime-illumination-production-5373.up.railway.app/api/audit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: url.trim() }),
