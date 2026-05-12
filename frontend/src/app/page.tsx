@@ -26,7 +26,12 @@ export default function Home() {
 
   const runAudit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url.trim()) return;
+    let auditUrl = url.trim();
+    if (!auditUrl) return;
+    // Auto-add https:// if missing
+    if (!auditUrl.startsWith('http://') && !auditUrl.startsWith('https://')) {
+      auditUrl = 'https://' + auditUrl;
+    }
 
     setLoading(true);
     setError("");
@@ -38,7 +43,7 @@ export default function Home() {
       const res = await fetch(`${apiBase}/api/audit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: auditUrl }),
       });
 
       if (!res.ok) {
@@ -46,7 +51,7 @@ export default function Home() {
         const fallbackRes = await fetch("https://sublime-illumination-production-5373.up.railway.app/api/audit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: url.trim() }),
+          body: JSON.stringify({ url: auditUrl }),
         });
         if (!fallbackRes.ok) {
           const data = await fallbackRes.json();
@@ -123,12 +128,12 @@ export default function Home() {
           <form onSubmit={runAudit} className="max-w-2xl mx-auto fade-up fade-up-delay-2">
             <div className="flex gap-2">
               <input
-                type="url"
+                type="text"
+                inputMode="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="Enter your store URL..."
+                placeholder="Enter your store URL (e.g. epictrendsstore.com)"
                 className="flex-1 px-5 py-4 rounded-xl bg-[#1e293b] border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e] transition text-lg"
-                required
               />
               <button
                 type="submit"
