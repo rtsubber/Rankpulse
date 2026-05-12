@@ -459,8 +459,8 @@ export default function Home() {
                   "PDF reports",
                   "Email alerts",
                 ],
-                cta: "Join Waitlist",
-                href: "#waitlist",
+                cta: "Get Pro",
+                href: "https://buy.stripe.com/test_14AaEXcvPafh7t3bcr97G02",
                 highlight: true,
               },
               {
@@ -475,8 +475,8 @@ export default function Home() {
                   "Priority queue",
                   "API access",
                 ],
-                cta: "Join Waitlist",
-                href: "#waitlist",
+                cta: "Get Agency",
+                href: "https://buy.stripe.com/test_eVqdR9dzT3QTdRr6Wb97G03",
                 highlight: false,
               },
             ].map((plan) => (
@@ -503,6 +503,8 @@ export default function Home() {
                 </ul>
                 <a
                   href={plan.href}
+                  target={plan.href.startsWith('http') ? '_blank' : undefined}
+                  rel={plan.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                   className={`block w-full py-3 rounded-xl font-semibold transition cursor-pointer text-center ${
                     plan.highlight
                       ? "bg-[#22c55e] text-black hover:bg-[#16a34a]"
