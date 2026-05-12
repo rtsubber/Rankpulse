@@ -16,6 +16,7 @@ from app.analyzers.images import analyze_images
 from app.analyzers.technical import analyze_technical
 from app.analyzers.schema_org import analyze_schema
 from app.analyzers.scoring import calculate_seo_score
+from app.waitlist import router as waitlist_router
 
 app = FastAPI(
     title="BoostRank API",
@@ -146,6 +147,9 @@ async def quick_check(url: HttpUrl = Query(..., description="URL to check")):
         "heading_structure": headings.get("structure", []),
         "issues": meta["issues"] + headings["issues"],
     }
+
+
+app.include_router(waitlist_router)
 
 
 if __name__ == "__main__":
