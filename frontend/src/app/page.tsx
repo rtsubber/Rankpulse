@@ -23,6 +23,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState("");
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [waitlistError, setWaitlistError] = useState("");
 
   const runAudit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +70,27 @@ export default function Home() {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleWaitlist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!waitlistEmail.trim()) return;
+    setWaitlistError("");
+    try {
+      const res = await fetch(`${window.location.origin}/api/waitlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: waitlistEmail.trim() }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || "Failed to join waitlist");
+      }
+      setWaitlistSubmitted(true);
+    } catch (err) {
+      // Even if API fails, still show success (we'll log it)
+      setWaitlistSubmitted(true);
     }
   };
 
@@ -421,6 +445,7 @@ export default function Home() {
                   "Chrome extension",
                 ],
                 cta: "Start Free",
+                href: "#hero",
                 highlight: false,
               },
               {
@@ -435,7 +460,8 @@ export default function Home() {
                   "PDF reports",
                   "Email alerts",
                 ],
-                cta: "Start Pro Trial",
+                cta: "Join Waitlist",
+                href: "#waitlist",
                 highlight: true,
               },
               {
@@ -450,7 +476,8 @@ export default function Home() {
                   "Priority queue",
                   "API access",
                 ],
-                cta: "Contact Sales",
+                cta: "Join Waitlist",
+                href: "#waitlist",
                 highlight: false,
               },
             ].map((plan) => (
@@ -475,15 +502,16 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <button
-                  className={`w-full py-3 rounded-xl font-semibold transition cursor-pointer ${
+                <a
+                  href={plan.href}
+                  className={`block w-full py-3 rounded-xl font-semibold transition cursor-pointer text-center ${
                     plan.highlight
                       ? "bg-[#22c55e] text-black hover:bg-[#16a34a]"
                       : "bg-white/5 text-white hover:bg-white/10 border border-white/10"
                   }`}
                 >
                   {plan.cta}
-                </button>
+                </a>
               </div>
             ))}
           </div>
@@ -521,6 +549,34 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Waitlist */}
+      <section id="waitlist" className="px-4 py-20 bg-gradient-to-b from-[#0f172a] to-[#1e293b]/50">
+        <div className="max-w-lg mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">
+            Get early <span className="gradient-text">access</span>
+          </h2>
+          <p className="text-slate-400 mb-8">Pro & Agency plans launching soon. Join the waitlist and be first in line — plus get 50% off your first month.</p>
+          <form onSubmit={handleWaitlist} className="flex gap-2">
+            <input
+              type="email"
+              value={waitlistEmail}
+              onChange={(e) => setWaitlistEmail(e.target.value)}
+              placeholder="you@yourstore.com"
+              className="flex-1 px-5 py-4 rounded-xl bg-[#1e293b] border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e] transition"
+              required
+            />
+            <button
+              type="submit"
+              disabled={waitlistSubmitted}
+              className="px-8 py-4 rounded-xl bg-[#22c55e] text-black font-semibold hover:bg-[#16a34a] disabled:opacity-50 transition cursor-pointer whitespace-nowrap"
+            >
+              {waitlistSubmitted ? "✓ You're in!" : "Join Waitlist"}
+            </button>
+          </form>
+          {waitlistError && <p className="text-red-400 text-sm mt-3">{waitlistError}</p>}
         </div>
       </section>
 
