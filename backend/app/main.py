@@ -2,13 +2,22 @@
 BoostRank — SEO Analysis API
 FastAPI backend for e-commerce SEO auditing.
 A BrandBoost Studio product.
+
+Features:
+- Free SEO audits (1/day free, unlimited Pro)
+- AI Agent API (100/month free, paid tiers)
+- Competitor comparison (Pro: 5/week, Agency: unlimited)
+- PDF report generation (Pro: 1/week, Agency: unlimited)
+- User signup/login with JWT auth
+- Stripe billing integration
 """
 
-from fastapi import FastAPI, HTTPException, Query
+import time
+from collections import defaultdict
+from fastapi import FastAPI, HTTPException, Query, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, HttpUrl
 from typing import Optional
-import time
 
 from app.analyzers.meta_tags import analyze_meta_tags
 from app.analyzers.headings import analyze_headings
@@ -18,19 +27,41 @@ from app.analyzers.schema_org import analyze_schema
 from app.analyzers.scoring import calculate_seo_score
 from app.waitlist import router as waitlist_router
 
+# New modules
+from app.database import (
+    init_db, get_db, check_rate_limit, increment_rate_limit,
+    save_audit, get_user_audits, get_audit_by_id, TIER_LIMITS,
+)
+from app.auth import (
+    signup, login, create_api_key, list_api_keys, revoke_api_key,
+    get_tier_info, get_current_user, get_api_key_user,
+    SignupRequest, LoginRequest, UserResponse,
+)
+from app.compare import router as compare_router
+from app.reports import router as reports_router
+from app.billing import router as billing_router
+from app.agent_api import router as agent_api_router
+
 app = FastAPI(
     title="BoostRank API",
     description="Instant SEO audits for e-commerce stores — a BrandBoost Studio product",
-    version="0.1.0",
+    version="1.0.0",
+    docs_url=None,  # Disable Swagger UI in production
+    redoc_url=None,  # Disable ReDoc in production
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://boostrank.co", "https://www.boostrank.co", "https://sublime-illumination-production-5373.up.railway.app"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "X-API-Key", "Content-Type"],
 )
+
+# Initialize database on startup
+@app.on_event("startup")
+async def startup():
+    init_db()
 
 
 # --- Models ---
@@ -55,22 +86,134 @@ class AuditResponse(BaseModel):
     page_data: dict
 
 
-# --- Endpoints ---
+# --- Auth Routes ---
 
-@app.get("/")
-async def root():
-    return {"name": "BoostRank", "version": "0.1.0", "by": "BrandBoost Studio", "status": "running"}
+# --- Auth Routes ---
+
+# Signup rate limiting
+_signup_tracker: dict[str, list[float]] = defaultdict(list)
+SIGNUP_RATE_LIMIT = 5  # per IP per hour
+SIGNUP_RATE_WINDOW = 3600  # 1 hour
 
 
-@app.get("/health")
-async def health():
-    return {"status": "ok", "timestamp": time.time()}
+def _check_signup_rate(client_ip: str) -> bool:
+    """Returns True if the IP is within signup rate limit."""
+    now = time.time()
+    timestamps = _signup_tracker.get(client_ip, [])
+    recent = [t for t in timestamps if now - t < SIGNUP_RATE_WINDOW]
+    _signup_tracker[client_ip] = recent
+    if len(recent) >= SIGNUP_RATE_LIMIT:
+        return False
+    recent.append(now)
+    return True
 
+
+class APIKeyCreateRequest(BaseModel):
+    name: str = "Default"
+
+class APIKeyRevokeRequest(BaseModel):
+    key_id: int
+
+
+@app.post("/api/auth/signup")
+async def auth_signup(request: SignupRequest, req: Request):
+    """Register a new user account."""
+    # Rate limit signups by IP
+    client_ip = req.client.host if req.client else "0.0.0.0"
+    if not _check_signup_rate(client_ip):
+        raise HTTPException(status_code=429, detail="Signup rate limit exceeded. Try again later.")
+    result = signup(request)
+    return result
+
+
+@app.post("/api/auth/login")
+async def auth_login(request: LoginRequest):
+    """Login and get JWT token."""
+    result = login(request)
+    return result
+
+
+@app.get("/api/auth/me", response_model=UserResponse)
+async def auth_me(user: dict = Depends(get_current_user)):
+    """Get current user info."""
+    return UserResponse(
+        id=user["id"],
+        email=user["email"],
+        name=user["name"],
+        tier=user["tier"],
+        created_at=user["created_at"],
+    )
+
+
+@app.get("/api/auth/tier")
+async def auth_tier(user: dict = Depends(get_current_user)):
+    """Get current tier and limits."""
+    return get_tier_info(user["id"])
+
+
+@app.post("/api/auth/keys")
+async def create_key(request: APIKeyCreateRequest, user: dict = Depends(get_current_user)):
+    """Create a new API key."""
+    return create_api_key(user["id"], name=request.name)
+
+
+@app.get("/api/auth/keys")
+async def list_keys(user: dict = Depends(get_current_user)):
+    """List your API keys."""
+    return {"keys": list_api_keys(user["id"])}
+
+
+@app.delete("/api/auth/keys/{key_id}")
+async def delete_key(key_id: int, user: dict = Depends(get_current_user)):
+    """Revoke an API key."""
+    revoke_api_key(user["id"], key_id)
+    return {"status": "revoked"}
+
+
+# --- Audit History ---
+
+@app.get("/api/audits")
+async def list_audits(
+    limit: int = 50,
+    offset: int = 0,
+    user: dict = Depends(get_current_user),
+):
+    """Get your audit history."""
+    audits = get_user_audits(user["id"], limit=limit, offset=offset)
+    return {"audits": audits}
+
+
+@app.get("/api/audits/{audit_id}")
+async def get_audit(audit_id: int, user: dict = Depends(get_current_user)):
+    """Get a specific audit by ID."""
+    audit = get_audit_by_id(audit_id)
+    if not audit:
+        raise HTTPException(status_code=404, detail="Audit not found")
+    if audit.get("user_id") and audit["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Not your audit")
+    return audit
+
+
+# --- Core Audit Endpoint (web, with rate limiting) ---
 
 @app.post("/api/audit", response_model=AuditResponse)
-async def audit_page(request: AuditRequest):
-    """Full SEO audit of a single page."""
+async def audit_page(
+    request: AuditRequest,
+    req: Request,
+    user: dict = Depends(get_current_user),
+):
+    """Full SEO audit of a single page (authenticated)."""
     url = str(request.url)
+    tier = user["tier"]
+
+    # Check rate limit
+    allowed, remaining, reset_in = check_rate_limit(user["id"], "audit", tier)
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Daily audit limit reached. Resets in {reset_in}s. Upgrade at https://boostrank.co/pricing",
+            headers={"Retry-After": str(reset_in)},
+        )
 
     try:
         from app.analyzers.fetcher import fetch_page
@@ -113,7 +256,16 @@ async def audit_page(request: AuditRequest):
         "final_url": final_url,
     }
 
-    return AuditResponse(
+    # Increment rate limit and save audit
+    increment_rate_limit(user["id"], "audit")
+    save_audit(
+        user_id=user["id"], api_key_id=None,
+        url=url, seo_score=scores["total"],
+        scores=scores, issues=all_issues, page_data=page_data,
+        source="web",
+    )
+
+    response = AuditResponse(
         url=url,
         timestamp=time.time(),
         seo_score=scores["total"],
@@ -122,10 +274,14 @@ async def audit_page(request: AuditRequest):
         page_data=page_data,
     )
 
+    # Add rate limit headers
+    # Note: FastAPI Response headers would be set on the Response object
+    return response
+
 
 @app.post("/api/quick-check")
 async def quick_check(url: HttpUrl = Query(..., description="URL to check")):
-    """Fast meta + heading check (no images, no schema)."""
+    """Fast meta + heading check (no auth required, no rate limit)."""
     url_str = str(url)
 
     try:
@@ -149,7 +305,32 @@ async def quick_check(url: HttpUrl = Query(..., description="URL to check")):
     }
 
 
+# --- Include Sub-Routers ---
+
+app.include_router(compare_router)
+app.include_router(reports_router)
+app.include_router(billing_router)
+app.include_router(agent_api_router)
 app.include_router(waitlist_router)
+
+
+# --- Health & Info ---
+
+@app.get("/")
+async def root():
+    return {
+        "name": "BoostRank",
+        "version": "1.0.0",
+        "by": "BrandBoost Studio",
+        "status": "running",
+        "docs": "/docs",
+        "api": "/api/v1",
+    }
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "timestamp": time.time()}
 
 
 if __name__ == "__main__":
