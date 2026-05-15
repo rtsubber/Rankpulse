@@ -16,6 +16,7 @@ import time
 from collections import defaultdict
 from fastapi import FastAPI, HTTPException, Query, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, HttpUrl
 from typing import Optional
 
@@ -108,6 +109,18 @@ def _check_signup_rate(client_ip: str) -> bool:
     return True
 
 
+def _get_client_ip(request: Request) -> str:
+    """Extract real client IP from X-Forwarded-For or fallback to request.client."""
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        # X-Forwarded-For: client, proxy1, proxy2
+        return forwarded.split(",")[0].strip()
+    real_ip = request.headers.get("x-real-ip", "")
+    if real_ip:
+        return real_ip.strip()
+    return request.client.host if request.client else "0.0.0.0"
+
+
 class APIKeyCreateRequest(BaseModel):
     name: str = "Default"
 
@@ -119,7 +132,7 @@ class APIKeyRevokeRequest(BaseModel):
 async def auth_signup(request: SignupRequest, req: Request):
     """Register a new user account."""
     # Rate limit signups by IP
-    client_ip = req.client.host if req.client else "0.0.0.0"
+    client_ip = _get_client_ip(req)
     if not _check_signup_rate(client_ip):
         raise HTTPException(status_code=429, detail="Signup rate limit exceeded. Try again later.")
     result = signup(request)
