@@ -9,8 +9,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ detail: "Missing url parameter" }, { status: 400 });
     }
 
-    const res = await fetch(`${API_BASE}/api/quick-check?url=${encodeURIComponent(url)}`, {
+    const res = await fetch(`${API_BASE}/api/v1/quick`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
     });
 
     const data = await res.json();
